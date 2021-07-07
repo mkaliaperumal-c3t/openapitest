@@ -1,0 +1,1201 @@
+{
+  "openapi": "3.0.2",
+  "info": {
+    "title": "CAPI",
+    "version": "1.0.0",
+    "description": "Chat API (CAPI) interactions",
+    "license": {
+      "name": "Agent511 Propreitary License",
+      "url": "www.agent511.com"
+    },
+    "contact": {
+      "name": "Support",
+      "email": "textbluesupport@agent511.com",
+      "url": "www.agent511.com"
+    }
+  },
+  "tags": [
+    {
+      "name": "chat",
+      "description": "CAPI - Interactions submitted by Client"
+    },
+    {
+      "name": "hook",
+      "description": "CAPI - Interactions submitted to Client"
+    }
+  ],
+  "paths": {
+    "/chat": {
+      "post": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChatSessionMT"
+              },
+              "examples": {
+                "example-1": {
+                  "value": {
+                    "cellNumber": "8475551212",
+                    "psapId": "23",
+                    "userId": "46",
+                    "msg": "This is test message"
+                  }
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CAPIResponse"
+                },
+                "examples": {
+                  "example-1": {
+                    "value": {
+                      "cellNumber": "123456",
+                      "msgId": "1111"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          }
+        },
+        "operationId": "createChatMTOp",
+        "summary": "Initiate a new Chat",
+        "description": "Initiate a MT Chat Session. ",
+        "tags": [
+          "chat"
+        ]
+      }
+    },
+    "/chat/{chatSessionId}/message": {
+      "summary": "Messages related to the Chat Session",
+      "post": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/ChatSessionMT"
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "language": {
+                        "type": "string"
+                      },
+                      "translate": {
+                        "type": "boolean"
+                      }
+                    }
+                  }
+                ]
+              },
+              "examples": {
+                "example-1": {
+                  "value": {
+                    "cellNumber": "8475551212",
+                    "psapId": "23",
+                    "userId": "46",
+                    "msg": "This is test message"
+                  }
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "examples": {
+                  "example-1": {
+                    "value": {
+                      "cellNumber": "123456",
+                      "msgId": "1111"
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/CAPIResponse"
+                }
+              }
+            },
+            "description": "Success Response retruned after sending the message to he reciepent"
+          }
+        },
+        "operationId": "sendMessageOp",
+        "summary": "Send Text Message on ongoing Chat",
+        "tags": [
+          "chat"
+        ],
+        "description": "Send Message"
+      },
+      "parameters": [
+        {
+          "name": "chatSessionId",
+          "description": "Session Id",
+          "schema": {
+            "type": "string",
+            "example": "12345"
+          },
+          "in": "path",
+          "required": true
+        }
+      ]
+    },
+    "/chat/{chatSessionId}": {
+      "summary": "Terminates the chat Session",
+      "delete": {
+        "parameters": [
+          {
+            "name": "cellNumber",
+            "description": "MDN for the SMS recipient",
+            "schema": {
+              "type": "string",
+              "example": "8475551212"
+            },
+            "in": "query",
+            "required": true
+          },
+          {
+            "name": "psapId",
+            "description": "PSAP ID (by AGENT511)",
+            "schema": {
+              "type": "string",
+              "example": "23"
+            },
+            "in": "query",
+            "required": true
+          },
+          {
+            "name": "userId",
+            "description": "PSAP queue ID (by AGENT51)",
+            "schema": {
+              "type": "string",
+              "example": "46"
+            },
+            "in": "query",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "examples": {},
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/CAPIResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "terminationCode": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            },
+            "description": "Success returns the message id of the terminated session send to the cellnumber"
+          }
+        },
+        "summary": "Terminates the Chat Session",
+        "tags": [
+          "chat"
+        ],
+        "operationId": "deleteSessionOp",
+        "description": "Terminates the Sesion"
+      },
+      "parameters": [
+        {
+          "schema": {
+            "type": "string",
+            "example": "12345"
+          },
+          "name": "chatSessionId",
+          "in": "path",
+          "description": "Session Id",
+          "required": true
+        }
+      ]
+    },
+    "/chat/{chatSessionId}/location": {
+      "summary": "Location for the cell number corresponding to the ChatSession",
+      "get": {
+        "parameters": [
+          {
+            "name": "cellNumber",
+            "description": "MDN for the SMS recipient",
+            "schema": {
+              "type": "string",
+              "example": "8475551212"
+            },
+            "in": "query",
+            "required": true
+          },
+          {
+            "name": "psapId",
+            "description": "PSAP ID (by AGENT511)",
+            "schema": {
+              "type": "string",
+              "example": "23"
+            },
+            "in": "query",
+            "required": true
+          },
+          {
+            "name": "userId",
+            "description": "PSAP queue ID (by AGENT51)",
+            "schema": {
+              "type": "string",
+              "example": "46"
+            },
+            "in": "query",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Location"
+                },
+                "examples": {
+                  "example-1": {
+                    "value": {
+                      "longitude": "43.23434",
+                      "accuracy": "100",
+                      "latitude": "43.23434"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "ReBid/Identify the Location for the number corresponding to the ChatSession",
+        "tags": [
+          "chat"
+        ],
+        "operationId": "rebidOperation",
+        "description": "Rebid Location"
+      },
+      "parameters": [
+        {
+          "schema": {
+            "type": "string",
+            "example": "12345"
+          },
+          "name": "chatSessionId",
+          "in": "path",
+          "required": true,
+          "description": "Session ID "
+        }
+      ]
+    },
+    "/chat/{chatSessionId}/user": {
+      "summary": "uses associated with the ChatSession",
+      "post": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChatSessionMT"
+              },
+              "examples": {
+                "example-1": {
+                  "value": {
+                    "cellNumber": "8475551212",
+                    "psapId": "23",
+                    "userId": "46",
+                    "msg": "This is test message"
+                  }
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "parameters": [
+          {
+            "name": "newPsapId",
+            "description": "Transferring PSAP ID",
+            "schema": {
+              "type": "string",
+              "example": "24"
+            },
+            "in": "query",
+            "required": true
+          },
+          {
+            "name": "newPsapUserId",
+            "description": "Receiving PSAP ID",
+            "schema": {
+              "type": "string",
+              "example": "47"
+            },
+            "in": "query",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "If transfer success return 200"
+          }
+        },
+        "summary": "Transfer ChatSession to the given newpsapid/user",
+        "tags": [
+          "chat"
+        ],
+        "description": "Transfer Session to other user or psap",
+        "operationId": "transferPsapUserOp"
+      },
+      "parameters": [
+        {
+          "name": "chatSessionId",
+          "schema": {
+            "type": "string",
+            "example": "12345"
+          },
+          "in": "path",
+          "required": true,
+          "description": "Session ID "
+        }
+      ]
+    },
+    "/chat/{chatSessionid}/psap_external": {
+      "parameters": [
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "chatSessionid",
+          "in": "path",
+          "required": true
+        }
+      ],
+      "post": {
+        "summary": "transferPsapExtOp",
+        "tags": [
+          "chat"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "operationId": "transferPsapExternalOp",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChatSessionMT"
+              }
+            },
+            "application/xml": {
+              "schema": {
+                "type": "object",
+                "properties": {}
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "query",
+            "name": "fccId",
+            "description": "FCC ID of the external psap  to transfer the chat session to",
+            "required": true
+          }
+        ],
+        "description": "Transfer the current session to External PSAP"
+      }
+    },
+    "/chatSubscribe": {
+      "post": {
+        "summary": "Subscribe to Incoming Chat MO",
+        "operationId": "chatSubscripeOp",
+        "responses": {
+          "201": {
+            "description": "Created",
+            "headers": {}
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "callBackUrl": {
+                    "type": "string",
+                    "description": "An URL in the API Client Environment",
+                    "format": "uri",
+                    "example": "https://clientServer.com/app/agent511"
+                  }
+                },
+                "required": [
+                  "callBackUrl"
+                ]
+              }
+            }
+          }
+        },
+        "description": "Subscribe for Chats or Events to be Published",
+        "callbacks": {
+          "ChatInitiated": {
+            "{$request.body#/callbackUrl}": {
+              "post": {
+                "summary": "New Call Initiated",
+                "requestBody": {
+                  "required": true,
+                  "content": {
+                    "application/json": {
+                      "schema": {
+                        "$ref": "#/components/schemas/ChatInitiatedMO"
+                      }
+                    }
+                  }
+                },
+                "responses": {
+                  "200": {
+                    "description": "New Chat Session has been accepted",
+                    "content": {
+                      "text/plain": {
+                        "examples": {
+                          "ok": {
+                            "value": "ok"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "ChatIncomingMsgReceived": {
+            "{$request.body#/callbackUrl}": {
+              "post": {
+                "summary": "New Incoming Message",
+                "requestBody": {
+                  "required": true,
+                  "content": {
+                    "application/json": {
+                      "schema": {
+                        "$ref": "#/components/schemas/ChatIncomingMsgReceivedMO"
+                      }
+                    }
+                  }
+                },
+                "responses": {
+                  "200": {
+                    "description": "New Message has been accepted",
+                    "content": {
+                      "text/plain": {
+                        "examples": {
+                          "ok": {
+                            "value": "ok"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "ChatLocationRebidMade": {
+            "{$request.body#/callbackUrl}": {
+              "post": {
+                "summary": "Rebid location only",
+                "requestBody": {
+                  "required": true,
+                  "content": {
+                    "application/json": {
+                      "schema": {
+                        "$ref": "#/components/schemas/ChatLocationRebidMO"
+                      }
+                    }
+                  }
+                },
+                "responses": {
+                  "200": {
+                    "description": "Rebid location details received",
+                    "content": {
+                      "text/plain": {
+                        "examples": {
+                          "ok": {
+                            "value": "ok"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "ChatSessionExpired": {
+            "{$request.body#/callbackUrl}": {
+              "post": {
+                "summary": "Session expired",
+                "requestBody": {
+                  "required": true,
+                  "content": {
+                    "application/json": {
+                      "schema": {
+                        "$ref": "#/components/schemas/ChatSessionExpiredMO"
+                      }
+                    }
+                  }
+                },
+                "responses": {
+                  "200": {
+                    "description": "ChatSessionExpired has been accepted",
+                    "content": {
+                      "text/plain": {
+                        "examples": {
+                          "ok": {
+                            "value": "ok"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "ChatTransferMade": {
+            "{$request.body#/callbackUrl}": {
+              "post": {
+                "summary": "Transfer requested",
+                "requestBody": {
+                  "required": true,
+                  "content": {
+                    "application/json": {
+                      "schema": {
+                        "$ref": "#/components/schemas/ChatTransferRequestedMO"
+                      }
+                    }
+                  }
+                },
+                "responses": {
+                  "200": {
+                    "description": "ChatTransferMade has been accepted",
+                    "content": {
+                      "text/plain": {
+                        "examples": {
+                          "ok": {
+                            "value": "ok"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "ChatSystemMsgReceived": {
+            "{$request.body#/callbackUrl}": {
+              "post": {
+                "summary": "ChatSystemMsgReceived",
+                "requestBody": {
+                  "required": true,
+                  "content": {
+                    "application/json": {
+                      "schema": {
+                        "$ref": "#/components/schemas/ChatSystemMsgMO"
+                      }
+                    }
+                  }
+                },
+                "responses": {
+                  "200": {
+                    "description": "ChatSystemMsgReceived has been accepted",
+                    "content": {
+                      "text/plain": {
+                        "examples": {
+                          "ok": {
+                            "value": "ok"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "ChatMMSRecieved": {
+            "{$request.body#/callbackUrl}": {
+              "post": {
+                "summary": "ChatMMSReceived",
+                "requestBody": {
+                  "required": true,
+                  "content": {
+                    "application/json": {
+                      "schema": {
+                        "$ref": "#/components/schemas/ChatMMSReceivedMO"
+                      }
+                    }
+                  }
+                },
+                "responses": {
+                  "200": {
+                    "description": "ChatMMSReceivedMO has been accepted",
+                    "content": {
+                      "text/plain": {
+                        "examples": {
+                          "ok": {
+                            "value": "ok"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "hook"
+        ]
+      }
+    },
+    "/chat/{chatSessionId}/mms": {
+      "parameters": [
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "chatSessionId",
+          "in": "path",
+          "required": true
+        }
+      ],
+      "get": {
+        "summary": "requestMMOp",
+        "tags": [
+          "chat"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "operationId": "requestMMSOp",
+        "description": "Request MMS Images/Videos to share from Texter",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "query",
+            "name": "mediaType",
+            "description": "MMS Media Type, can be image/video"
+          }
+        ]
+      }
+    },
+    "/chat/{chatSessionId}/videostream": {
+      "parameters": [
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "chatSessionId",
+          "in": "path",
+          "required": true
+        }
+      ],
+      "get": {
+        "summary": "Request Video Stream",
+        "tags": [
+          "chat"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "operationId": "webrtcVideoStreamOp",
+        "description": "Request a videostream from Texter"
+      }
+    },
+    "/chat/{chatSessionId}/translation": {
+      "post": {
+        "summary": "Enable or Disable Translation Feature for the chat",
+        "tags": [
+          "chat"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "operationId": "chatTransationFeature",
+        "parameters": [
+          {
+            "schema": {
+              "type": "boolean"
+            },
+            "in": "query",
+            "name": "autoTranslate"
+          }
+        ],
+        "description": "Set Translation Language for the Chat"
+      },
+      "get": {
+        "summary": "Get Translation Feature Enabled for Chat",
+        "tags": [ "chat"],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ChatSessionBaseMT"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "autoTranslate": {
+                          "type": "boolean"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "operationId": "getChatTranslationFeature",
+        "description": "Check Translation Feature Enabled for a chat"
+      },
+      "parameters": [
+        {
+          "schema": {
+            "type": "string"
+          },
+          "name": "chatSessionId",
+          "in": "path",
+          "required": true
+        }
+      ]
+    }
+  },
+  "components": {
+    "schemas": {
+      "ChatSessionBaseMT": {
+        "description": "",
+        "type": "object",
+        "properties": {
+          "cellNumber": {
+            "description": "MDN for the SMS recipient",
+            "type": "string"
+          },
+          "psapId": {
+            "description": "PSAP ID (by AGENT511)",
+            "type": "string"
+          },
+          "userId": {
+            "description": "PSAP queue ID (by AGENT51)",
+            "type": "string"
+          }
+        },
+        "required": [
+          "cellNumber",
+          "psapId",
+          "userId"
+        ],
+        "x-examples": {
+          "example-1": {
+            "cellNumber": "8475551212",
+            "psapId": "23",
+            "userId": "46"
+          }
+        }
+      },
+      "ChatInitiatedMO": {
+        "title": "ChatInitiatedMO",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ChatSessionBaseMO"
+          },
+          {
+            "$ref": "#/components/schemas/Message"
+          },
+          {
+            "$ref": "#/components/schemas/Location"
+          },
+          {
+            "$ref": "#/components/schemas/Media"
+          }
+        ],
+        "description": "New call initiated",
+        "x-examples": {
+          "example-1": {
+            "value": {
+              "cellNumber": "8475551212",
+              "chatSessionId": "12345",
+              "psapId": "23",
+              "userId": "46",
+              "carrierId": "2",
+              "dateTime": "2013-05-05 14:05:03:102",
+              "msg": "I need help",
+              "translatedMsg": "Necesito ayuda",
+              "language": "EN (ES)",
+              "longitude": "43.23434",
+              "accuracy": "100",
+              "latitude": "43.23434"
+            }
+          }
+        }
+      },
+      "ChatLocationRebidMO": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ChatSessionBaseMO"
+          },
+          {
+            "$ref": "#/components/schemas/Location"
+          }
+        ],
+        "description": "Rebid location only"
+      },
+      "ChatIncomingMsgReceivedMO": {
+        "title": "ChatIncomingMsgReceivedMO",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ChatSessionBaseMO"
+          },
+          {
+            "$ref": "#/components/schemas/Message"
+          }
+        ],
+        "description": "New incoming message"
+      },
+      "ChatSessionExpiredMO": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ChatSessionBaseMO"
+          }
+        ],
+        "description": "Session expired"
+      },
+      "ChatSystemMsgMO": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ChatSessionBaseMO"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "msgBody": {
+                "type": "string",
+                "description": "System message",
+                "example": "Your message is in Queue. Pls Wait"
+              }
+            },
+            "required": [
+              "msgBody"
+            ]
+          }
+        ],
+        "description": "System message",
+        "x-examples": {
+          "example-1": {}
+        }
+      },
+      "ChatTransferRequestedMO": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ChatSessionBaseMO"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "newpsapID": {
+                "type": "string",
+                "description": "Transferring PSAP ID (by AGENT511)",
+                "example": "24"
+              },
+              "newuserID": {
+                "type": "string",
+                "description": "Receiving PSAP ID (by AGENT511)",
+                "example": "27"
+              }
+            },
+            "required": [
+              "newpsapID",
+              "newuserID"
+            ]
+          }
+        ],
+        "description": "Transfer requested"
+      },
+      "ChatSessionMT": {
+        "title": "ChatSessionMT",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ChatSessionBaseMT"
+          },
+          {
+            "$ref": "#/components/schemas/Message"
+          }
+        ],
+        "x-examples": {
+          "example-1": {
+            "cellNumber": "8475551212",
+            "psapId": "23",
+            "userId": "46",
+            "msg": "This is test message"
+          },
+          "example-2": {
+            "value": {
+              "cellNumber": "string",
+              "psapId": "string",
+              "userId": "string",
+              "msg": "string"
+            }
+          }
+        }
+      },
+      "ChatSessionBaseMO": {
+        "title": "ChatSessionBaseMO",
+        "type": "object",
+        "description": "Base Schema for MO Chat API",
+        "x-examples": {
+          "example-1": {
+            "cellNumber": "8475551212",
+            "chatSessionId": "12345",
+            "psapId": "23",
+            "userId": "46",
+            "carrierId": "2"
+          }
+        },
+        "properties": {
+          "cellNumber": {
+            "type": "string",
+            "description": "MDN for incoming transaction",
+            "example": "8475551212"
+          },
+          "chatSessionId": {
+            "type": "string",
+            "description": "Session ID",
+            "example": "12345"
+          },
+          "psapId": {
+            "type": "string",
+            "description": "PSAP ID (by AGENT511)",
+            "example": "23"
+          },
+          "userId": {
+            "type": "string",
+            "description": "PSAP queue ID (by AGENT511)",
+            "example": "46"
+          },
+          "carrierId": {
+            "type": "string",
+            "description": "Carrier ID",
+            "example": "2"
+          },
+          "dateTime": {
+            "type": "string",
+            "example": "2013-05-05 14:05:03:102",
+            "description": "Transaction time on TEXTBLUE (GMT)"
+          }
+        },
+        "required": [
+          "cellNumber",
+          "chatSessionId",
+          "psapId",
+          "userId",
+          "dateTime"
+        ]
+      },
+      "Location": {
+        "title": "Location",
+        "type": "object",
+        "x-examples": {
+          "example-1": {
+            "value": {
+              "longitude": "43.23434",
+              "accuracy": "100",
+              "latitude": "43.23434"
+            }
+          }
+        },
+        "properties": {
+          "longitude": {
+            "type": "string",
+            "description": "Handset latitude",
+            "example": "43.23434"
+          },
+          "accuracy": {
+            "type": "string",
+            "description": "Handset longitude",
+            "example": "100"
+          },
+          "latitude": {
+            "type": "string",
+            "description": "Handset location (meters)",
+            "example": "43.23434"
+          },
+          "googleMapURL": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "longitude",
+          "accuracy",
+          "latitude"
+        ]
+      },
+      "Message": {
+        "title": "Message",
+        "type": "object",
+        "properties": {
+          "msg": {
+            "type": "string",
+            "description": "Body of incoming message",
+            "example": "I need help"
+          },
+          "translatedMsg": {
+            "type": "string",
+            "description": "Translated incoming message",
+            "example": "Necesito ayuda"
+          },
+          "language": {
+            "type": "string",
+            "description": "Detected inbound language",
+            "example": "EN (ES)"
+          },
+          "msgType": {
+            "type": "string",
+            "description": "Indicate the Message Type as System Message Or User message"
+          }
+        },
+        "required": [
+          "msg"
+        ]
+      },
+      "CAPIErrorResponse": {
+        "title": "CAPIErrorResponse",
+        "type": "object",
+        "properties": {
+          "errorCode": {
+            "type": "string"
+          },
+          "errorDescription": {
+            "type": "string"
+          }
+        }
+      },
+      "CAPIResponse": {
+        "title": "CAPIResponse",
+        "type": "object",
+        "x-examples": {
+          "example-1": {
+            "cellNumber": "123456",
+            "msgId": "1111"
+          }
+        },
+        "properties": {
+          "cellNumber": {
+            "type": "string"
+          },
+          "msgId": {
+            "type": "string"
+          }
+        }
+      },
+      "Media": {
+        "title": "Media",
+        "type": "object",
+        "properties": {
+          "mediaType": {
+            "type": "string"
+          },
+          "mediaUrl": {
+            "type": "string"
+          }
+        }
+      },
+      "ChatMMSReceivedMO": {
+        "title": "ChatMMSReceivedMO",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ChatSessionBaseMT"
+          },
+          {
+            "$ref": "#/components/schemas/Media"
+          }
+        ]
+      }
+    },
+    "responses": {
+      "UnauthorizedError": {
+        "description": "API key is missing or invalid",
+        "headers": {
+          "WWW_Authenticate": {
+            "schema": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "ApiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-API-KEY"
+      }
+    }
+  },
+  "security": [
+    {
+      "ApiKeyAuth": []
+    }
+  ],
+  "servers": [
+    {
+      "url": "uat.textblue911.com",
+      "description": "UAT Server"
+    },
+    {
+      "url": "apiclient.com",
+      "description": "API Client Server"
+    }
+  ]
+}
